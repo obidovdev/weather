@@ -1,0 +1,1112 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Ob-Havo</title>
+
+    <!-- Mobile & PWA Primary Meta Tags -->
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Ob-Havo Glass">
+    <meta id="themeColorMeta" name="theme-color" content="#0f172a">
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
+                    },
+                    animation: {
+                        'float': 'float 8s ease-in-out infinite',
+                        'pulse-glow': 'pulseGlow 6s ease-in-out infinite',
+                        'spin-slow': 'spin 14s linear infinite',
+                    },
+                    keyframes: {
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0px) scale(1)' },
+                            '50%': { transform: 'translateY(-15px) scale(1.02)' },
+                        },
+                        pulseGlow: {
+                            '0%, 100%': { opacity: '0.6', transform: 'scale(1)' },
+                            '50%': { opacity: '0.9', transform: 'scale(1.1)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #090d16;
+            color: #ffffff;
+            overflow-x: hidden;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+            padding-top: env(safe-area-inset-top);
+            padding-bottom: env(safe-area-inset-bottom);
+            transition: background 1.2s ease-in-out;
+        }
+
+        /* iOS 26 Liquid Glass Classes */
+        .liquid-glass {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(35px) saturate(210%);
+            -webkit-backdrop-filter: blur(35px) saturate(210%);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow:
+                0 25px 60px rgba(0, 0, 0, 0.3),
+                inset 0 1px 1px rgba(255, 255, 255, 0.45),
+                inset 0 -1px 2px rgba(0, 0, 0, 0.15);
+        }
+
+        .liquid-glass-subtle {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(25px) saturate(190%);
+            -webkit-backdrop-filter: blur(25px) saturate(190%);
+            border: 1px solid rgba(255, 255, 255, 0.22);
+        }
+
+        .liquid-glass-interactive {
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .liquid-glass-interactive:hover {
+            background: rgba(255, 255, 255, 0.22);
+            border-color: rgba(255, 255, 255, 0.45);
+            transform: translateY(-2px) scale(1.01);
+            box-shadow:
+                0 25px 60px rgba(0, 0, 0, 0.3),
+                inset 0 1px 2px rgba(255, 255, 255, 0.6);
+        }
+
+        .liquid-glass-interactive:active {
+            transform: translateY(0) scale(0.98);
+        }
+
+        .mac-window-shadow {
+            box-shadow: 0 40px 100px -20px rgba(0, 0, 0, 0.65), 0 0 1px 1px rgba(255, 255, 255, 0.25);
+        }
+
+        /* Custom Scrollbar */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        /* Day Sky Gradient (Musafo osmon) */
+        .bg-mesh-day {
+            background: radial-gradient(circle at 15% 15%, #38bdf8 0%, transparent 45%),
+                        radial-gradient(circle at 85% 20%, #60a5fa 0%, transparent 50%),
+                        radial-gradient(circle at 50% 85%, #0284c7 0%, transparent 55%),
+                        radial-gradient(circle at 10% 80%, #fef08a 0%, transparent 35%),
+                        #0369a1;
+        }
+
+        /* Night Deep Dark Gradient */
+        .bg-mesh-night {
+            background: radial-gradient(circle at 20% 20%, #1e1b4b 0%, transparent 45%),
+                        radial-gradient(circle at 80% 15%, #311b92 0%, transparent 50%),
+                        radial-gradient(circle at 50% 80%, #090d16 0%, transparent 60%),
+                        #030712;
+        }
+
+        /* Raindrop animation overlay */
+        .rain-drop {
+            position: absolute;
+            background: linear-gradient(transparent, rgba(255, 255, 255, 0.5));
+            width: 1.5px;
+            height: 40px;
+            opacity: 0.6;
+            animation: drop 1.2s linear infinite;
+            pointer-events: none;
+        }
+
+        @keyframes drop {
+            0% { transform: translateY(-100px); opacity: 0; }
+            50% { opacity: 0.6; }
+            100% { transform: translateY(100vh); opacity: 0; }
+        }
+
+        /* Temp Range Bar */
+        .temp-bar-bg {
+            background: rgba(0, 0, 0, 0.25);
+            border-radius: 999px;
+            position: relative;
+            height: 6px;
+            overflow: hidden;
+        }
+
+        .temp-bar-fill {
+            height: 100%;
+            border-radius: 999px;
+            background: linear-gradient(90deg, #38ef7d, #ffd200, #ff0844);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-0 sm:p-4 md:p-6 relative selection:bg-white/20">
+
+    <!-- Dynamic Mesh Background Layer -->
+    <div id="bgMesh" class="fixed inset-0 bg-mesh-night transition-all duration-1000 -z-30"></div>
+
+    <!-- Night Mode Shooting Stars Canvas -->
+    <canvas id="starsCanvas" class="fixed inset-0 pointer-events-none -z-20 transition-opacity duration-1000 opacity-100"></canvas>
+
+    <!-- Animated Ambient Light Orbs for Liquid Glass Glow -->
+    <div id="orb1" class="fixed top-1/4 left-10 w-72 h-72 sm:w-96 sm:h-96 bg-purple-600/30 rounded-full filter blur-[100px] animate-float -z-10 pointer-events-none transition-colors duration-1000"></div>
+    <div id="orb2" class="fixed bottom-1/4 right-10 w-80 h-80 sm:w-[500px] sm:h-[500px] bg-cyan-500/25 rounded-full filter blur-[120px] animate-pulse-glow -z-10 pointer-events-none transition-colors duration-1000"></div>
+    <div id="orb3" class="fixed top-2/3 left-1/3 w-64 h-64 bg-amber-500/20 rounded-full filter blur-[90px] -z-10 pointer-events-none transition-colors duration-1000"></div>
+
+    <!-- Rain Drops Container -->
+    <div id="rainContainer" class="fixed inset-0 pointer-events-none z-0 hidden"></div>
+
+    <!-- MAIN CONTAINER (macOS Window / iOS Full View Responsive) -->
+    <main class="w-full max-w-5xl min-h-screen sm:min-h-[880px] sm:max-h-[95vh] sm:rounded-[38px] liquid-glass mac-window-shadow flex flex-col overflow-hidden relative border border-white/30 backdrop-blur-3xl z-10">
+
+        <!-- macOS / iOS Dynamic Top Navigation Bar -->
+        <header class="px-4 py-3 sm:px-8 sm:py-5 border-b border-white/15 flex items-center justify-between gap-3 select-none relative z-30">
+
+            <!-- Left Side: macOS Window Controls & Dynamic Island Badge -->
+            <div class="flex items-center gap-2 sm:gap-3">
+                <div class="hidden sm:flex items-center gap-2 mr-1">
+                    <span class="w-3.5 h-3.5 rounded-full bg-red-500/80 hover:bg-red-500 transition-colors cursor-pointer shadow-sm"></span>
+                    <span class="w-3.5 h-3.5 rounded-full bg-yellow-500/80 hover:bg-yellow-500 transition-colors cursor-pointer shadow-sm"></span>
+                    <span class="w-3.5 h-3.5 rounded-full bg-green-500/80 hover:bg-green-500 transition-colors cursor-pointer shadow-sm"></span>
+                </div>
+
+                <!-- Dynamic Pill Status -->
+                <div class="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-black/25 border border-white/15 text-xs font-semibold backdrop-blur-md">
+                    <span id="dayNightDot" class="w-2.5 h-2.5 rounded-full bg-indigo-400 animate-ping"></span>
+                    <span class="tracking-wide text-white/90" id="liveTime">12:00</span>
+                    <span class="text-white/30">|</span>
+                    <span id="currentCityHeader" class="text-white/90 font-semibold truncate max-w-[100px] sm:max-w-[150px]">Toshkent</span>
+                </div>
+            </div>
+
+            <!-- Center Search Bar with Suggestions -->
+            <div class="relative flex-1 max-w-xs sm:max-w-md mx-1">
+                <div class="relative flex items-center">
+                    <i data-lucide="search" class="absolute left-3.5 w-4 h-4 text-white/60 pointer-events-none"></i>
+                    <input type="text" id="searchInput" placeholder="Shahar izlash..."
+                           class="w-full pl-9 pr-8 py-2 rounded-2xl bg-white/10 border border-white/20 text-white placeholder-white/50 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-white/40 focus:bg-white/20 transition-all shadow-inner">
+                    <button id="clearSearchBtn" class="absolute right-3 hidden text-white/60 hover:text-white">
+                        <i data-lucide="x" class="w-4 h-4"></i>
+                    </button>
+                </div>
+
+                <!-- Search Suggestions Dropdown Menu -->
+                <div id="searchResults" class="absolute top-full left-0 right-0 mt-2 rounded-2xl liquid-glass bg-slate-900/95 border border-white/20 overflow-hidden shadow-2xl hidden z-50 divide-y divide-white/10 max-h-64 overflow-y-auto">
+                </div>
+            </div>
+
+            <!-- Right Controls: GPS, Install PWA, Language, Unit Toggle -->
+            <div class="flex items-center gap-1.5 sm:gap-2">
+                <!-- GPS Location Permission Trigger -->
+                <button id="gpsBtn" title="Mening joylashuvim" class="p-2 sm:p-2.5 rounded-2xl bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-400/40 text-emerald-300 transition-all active:scale-95 shadow-md flex items-center gap-1.5 text-xs font-semibold">
+                    <i data-lucide="navigation" class="w-4 h-4 animate-pulse"></i>
+                    <span class="hidden md:inline" id="gpsBtnText">Joylashuv</span>
+                </button>
+
+                <!-- Install App Button (Android/iOS PWA Prompt) -->
+                <button id="installAppBtn" class="p-2 sm:px-3 sm:py-2 rounded-2xl bg-gradient-to-r from-cyan-500/30 to-blue-600/30 hover:from-cyan-500/40 hover:to-blue-600/40 border border-cyan-400/40 text-white transition-all active:scale-95 shadow-md flex items-center gap-1.5 text-xs font-semibold">
+                    <i data-lucide="download" class="w-4 h-4 text-cyan-300"></i>
+                    <span class="hidden sm:inline" id="installBtnText">App</span>
+                </button>
+
+                <!-- Language Toggle Button -->
+                <button id="langToggleBtn" class="px-2 sm:px-2.5 py-1.5 rounded-2xl bg-white/10 hover:bg-white/20 border border-white/15 text-xs font-bold text-white transition-all">
+                    UZ
+                </button>
+
+                <!-- Celsius / Fahrenheit Toggle -->
+                <div class="flex items-center p-1 rounded-2xl bg-black/25 border border-white/15">
+                    <button id="btnCelsius" class="px-2 sm:px-2.5 py-1 rounded-xl text-xs font-bold transition-all bg-white/30 text-white shadow-sm">°C</button>
+                    <button id="btnFahrenheit" class="px-2 sm:px-2.5 py-1 rounded-xl text-xs font-bold transition-all text-white/60 hover:text-white">°F</button>
+                </div>
+            </div>
+        </header>
+
+        <!-- GPS Permission & PWA Install Banner Container -->
+        <div id="permissionBanner" class="px-4 py-3 bg-indigo-900/60 border-b border-white/15 backdrop-blur-md flex flex-wrap items-center justify-between gap-3 text-xs text-white/90 hidden">
+            <div class="flex items-center gap-2">
+                <i data-lucide="map-pin" class="w-4 h-4 text-emerald-400"></i>
+                <span id="bannerText">Joylashuvingizga ruxsat bering, aniq ob-havoni ko'rsatamiz.</span>
+            </div>
+            <div class="flex items-center gap-2">
+                <button id="allowLocationBtn" class="px-3 py-1 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white font-bold transition-all shadow-md">
+                    Ruxsat berish
+                </button>
+                <button id="closeBannerBtn" class="p-1 text-white/60 hover:text-white">
+                    <i data-lucide="x" class="w-4 h-4"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- MAIN SCROLLABLE CONTENT BODY -->
+        <div class="flex-1 overflow-y-auto no-scrollbar p-4 sm:p-6 md:p-8 space-y-5">
+
+            <!-- HERO MAIN WEATHER CARD -->
+            <section class="relative rounded-3xl p-6 sm:p-8 liquid-glass-subtle border border-white/20 overflow-hidden text-center sm:text-left flex flex-col sm:flex-row items-center justify-between gap-6 group">
+                <div class="space-y-2 relative z-10">
+                    <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/10 border border-white/20 text-xs font-semibold text-white/90 shadow-sm">
+                        <i data-lucide="map-pin" class="w-3.5 h-3.5 text-amber-300"></i>
+                        <span id="cityName" class="tracking-wide">Toshkent, O'zbekiston</span>
+                    </div>
+
+                    <div class="flex items-baseline justify-center sm:justify-start gap-2 pt-1">
+                        <h1 id="heroTemp" class="text-6xl sm:text-8xl font-extrabold tracking-tighter text-transparent bg-clip-text bg-gradient-to-br from-white via-white to-white/70">
+                            --°
+                        </h1>
+                    </div>
+
+                    <p id="heroCondition" class="text-lg sm:text-xl font-medium text-white/90 capitalize">Yuklanmoqda...</p>
+
+                    <div class="flex items-center justify-center sm:justify-start gap-3 sm:gap-4 text-xs sm:text-sm font-medium text-white/70 pt-1">
+                        <span><span id="lblMax">Yuqori</span>: <strong id="heroMaxTemp" class="text-white">--°</strong></span>
+                        <span>•</span>
+                        <span><span id="lblMin">Pastroq</span>: <strong id="heroMinTemp" class="text-white">--°</strong></span>
+                        <span>•</span>
+                        <span><span id="lblFeels">Hissiyot</span>: <strong id="heroFeelsLike" class="text-white">--°</strong></span>
+                    </div>
+                </div>
+
+                <!-- Animated Weather Icon -->
+                <div class="relative flex items-center justify-center p-2">
+                    <div class="w-32 h-32 sm:w-44 sm:h-44 relative flex items-center justify-center drop-shadow-[0_15px_25px_rgba(0,0,0,0.3)]">
+                        <div id="weatherIconContainer" class="w-full h-full flex items-center justify-center text-amber-300">
+                            <i data-lucide="sun" class="w-28 h-28 sm:w-36 sm:h-36 animate-spin-slow"></i>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- HOURLY FORECAST CAROUSEL -->
+            <section class="rounded-3xl p-5 sm:p-6 liquid-glass-subtle border border-white/20 space-y-3">
+                <div class="flex items-center justify-between text-xs font-bold tracking-wider text-white/70 uppercase px-1">
+                    <div class="flex items-center gap-2">
+                        <i data-lucide="clock" class="w-4 h-4 text-sky-300"></i>
+                        <span id="lblHourly">Soatlik Prognoz (24 Soat)</span>
+                    </div>
+                    <span class="text-white/40 lowercase hidden sm:inline">gorizontal suring &rarr;</span>
+                </div>
+
+                <div id="hourlyContainer" class="flex gap-3 overflow-x-auto no-scrollbar py-2 px-1 scroll-smooth">
+                    <!-- Dynamic hourly items -->
+                </div>
+            </section>
+
+            <!-- TWO COLUMN GRID: 7-DAY FORECAST & METRICS -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
+
+                <!-- 7-Day Forecast Column -->
+                <section class="lg:col-span-5 rounded-3xl p-5 sm:p-6 liquid-glass-subtle border border-white/20 flex flex-col justify-between space-y-4">
+                    <div class="flex items-center gap-2 text-xs font-bold tracking-wider text-white/70 uppercase pb-2 border-b border-white/10">
+                        <i data-lucide="calendar" class="w-4 h-4 text-emerald-300"></i>
+                        <span id="lblDaily">7 Kunlik Ob-Havo</span>
+                    </div>
+
+                    <div id="dailyContainer" class="space-y-3 flex-1 flex flex-col justify-around">
+                        <!-- Dynamic daily items -->
+                    </div>
+                </section>
+
+                <!-- METRICS WIDGETS GRID -->
+                <section class="lg:col-span-7 grid grid-cols-2 sm:grid-cols-3 gap-3.5 sm:gap-4">
+
+                    <!-- UV Index -->
+                    <div class="rounded-3xl p-4 sm:p-5 liquid-glass-interactive flex flex-col justify-between space-y-3 border border-white/20">
+                        <div class="flex items-center justify-between text-white/70">
+                            <span class="text-xs font-semibold uppercase tracking-wider" id="lblUV">UV Indeks</span>
+                            <i data-lucide="sun-medium" class="w-4 h-4 text-amber-300"></i>
+                        </div>
+                        <div>
+                            <div id="uvValue" class="text-2xl sm:text-3xl font-bold">--</div>
+                            <div id="uvDesc" class="text-xs font-medium text-emerald-300 mt-0.5">--</div>
+                        </div>
+                        <div class="w-full bg-white/10 h-2 rounded-full overflow-hidden">
+                            <div id="uvBar" class="bg-gradient-to-r from-green-400 via-amber-400 to-red-500 h-full w-[0%] transition-all duration-500"></div>
+                        </div>
+                    </div>
+
+                    <!-- Wind Speed -->
+                    <div class="rounded-3xl p-4 sm:p-5 liquid-glass-interactive flex flex-col justify-between space-y-3 border border-white/20">
+                        <div class="flex items-center justify-between text-white/70">
+                            <span class="text-xs font-semibold uppercase tracking-wider" id="lblWind">Shamol</span>
+                            <i data-lucide="wind" class="w-4 h-4 text-cyan-300"></i>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <div id="windSpeed" class="text-2xl sm:text-3xl font-bold">--</div>
+                                <div id="windDirText" class="text-xs text-white/70 mt-0.5">--</div>
+                            </div>
+                            <div class="w-9 h-9 rounded-full border border-white/30 flex items-center justify-center bg-white/5">
+                                <i id="windCompass" data-lucide="navigation-2" class="w-4 h-4 text-cyan-300 transition-transform duration-700"></i>
+                            </div>
+                        </div>
+                        <p class="text-[11px] text-white/50" id="lblWindDesc">Barqaror shamol</p>
+                    </div>
+
+                    <!-- Humidity -->
+                    <div class="rounded-3xl p-4 sm:p-5 liquid-glass-interactive flex flex-col justify-between space-y-3 border border-white/20">
+                        <div class="flex items-center justify-between text-white/70">
+                            <span class="text-xs font-semibold uppercase tracking-wider" id="lblHumidity">Namlik</span>
+                            <i data-lucide="droplets" class="w-4 h-4 text-blue-400"></i>
+                        </div>
+                        <div>
+                            <div id="humidityVal" class="text-2xl sm:text-3xl font-bold">--%</div>
+                            <div id="dewPointVal" class="text-xs text-white/70 mt-0.5">--</div>
+                        </div>
+                        <div class="w-full bg-white/10 h-2 rounded-full overflow-hidden">
+                            <div id="humidityBar" class="bg-blue-400 h-full w-[0%] transition-all duration-500"></div>
+                        </div>
+                    </div>
+
+                    <!-- AQI -->
+                    <div class="rounded-3xl p-4 sm:p-5 liquid-glass-interactive flex flex-col justify-between space-y-3 border border-white/20">
+                        <div class="flex items-center justify-between text-white/70">
+                            <span class="text-xs font-semibold uppercase tracking-wider" id="lblAQI">Havo Sifati</span>
+                            <i data-lucide="sparkles" class="w-4 h-4 text-emerald-300"></i>
+                        </div>
+                        <div>
+                            <div id="aqiVal" class="text-2xl sm:text-3xl font-bold">--</div>
+                            <div id="aqiStatus" class="text-xs font-medium text-emerald-300 mt-0.5">--</div>
+                        </div>
+                        <div class="w-full bg-white/10 h-2 rounded-full overflow-hidden">
+                            <div id="aqiBar" class="bg-emerald-400 h-full w-[0%] transition-all duration-500"></div>
+                        </div>
+                    </div>
+
+                    <!-- Sunrise & Sunset -->
+                    <div class="rounded-3xl p-4 sm:p-5 liquid-glass-interactive flex flex-col justify-between space-y-2 border border-white/20 col-span-2 sm:col-span-1">
+                        <div class="flex items-center justify-between text-white/70">
+                            <span class="text-xs font-semibold uppercase tracking-wider" id="lblSun">Quyosh Botishi</span>
+                            <i data-lucide="sunset" class="w-4 h-4 text-orange-400"></i>
+                        </div>
+                        <div>
+                            <div id="sunsetTime" class="text-2xl sm:text-3xl font-bold">--:--</div>
+                            <div id="sunriseTime" class="text-xs text-white/70 mt-0.5">--:--</div>
+                        </div>
+                        <p class="text-[11px] text-white/50" id="lblSunDesc">Kun davomiyligi: ~12 soat</p>
+                    </div>
+
+                    <!-- Pressure & Visibility -->
+                    <div class="rounded-3xl p-4 sm:p-5 liquid-glass-interactive flex flex-col justify-between space-y-3 border border-white/20">
+                        <div class="flex items-center justify-between text-white/70">
+                            <span class="text-xs font-semibold uppercase tracking-wider" id="lblPressure">Bosim</span>
+                            <i data-lucide="eye" class="w-4 h-4 text-indigo-300"></i>
+                        </div>
+                        <div>
+                            <div id="visibilityVal" class="text-xl sm:text-2xl font-bold">10 km</div>
+                            <div id="pressureVal" class="text-xs text-white/70 mt-1">Bosim: -- hPa</div>
+                        </div>
+                        <p class="text-[11px] text-white/50" id="lblVisDesc">Tiniq ko'rinish</p>
+                    </div>
+
+                </section>
+            </div>
+
+        </div>
+
+        <!-- FOOTER BAR -->
+        <footer class="px-6 py-3 border-t border-white/10 text-center text-xs text-white/40 flex flex-col sm:flex-row items-center justify-between gap-2 backdrop-blur-md">
+            <span>Bu sayt OBIDOVDEV tomonidan yaratilgan </span>
+            <span>
+                <a href="https://obidovdev.uz" target="_blank" rel="noopener noreferrer"
+                    class="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold transition-all border border-white/15 hover:border-white/30 active:scale-95 shadow-sm">
+                    <span>obidovdev.uz</span>
+                </a>
+            </span>
+        </footer>
+
+    </main>
+
+    <!-- PWA Install Modal Dialog -->
+    <div id="installModal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-md flex items-center justify-center p-4 hidden">
+        <div class="liquid-glass rounded-3xl max-w-sm w-full p-6 space-y-4 border border-white/30 text-center">
+            <div class="w-16 h-16 rounded-2xl bg-gradient-to-tr from-cyan-400 to-blue-600 flex items-center justify-center mx-auto shadow-lg">
+                <i data-lucide="cloud-sun" class="w-10 h-10 text-white"></i>
+            </div>
+            <h3 class="text-xl font-bold text-white">"Ob-Havo/Dev" Ilovasini O'rnatish</h3>
+            <p class="text-xs text-white/80 leading-relaxed" id="installGuideText">
+                Android yoki iPhone telefoningiz asosiy ekraniga o'rnatib, xuddi haqiqiy mobil ilovadek foydalaning!
+            </p>
+            <div id="installInstructions" class="text-xs text-emerald-300 bg-white/10 p-3 rounded-2xl border border-white/15 text-left leading-relaxed">
+                • <strong>Android:</strong> Brauzer menyusidagi (⋮) tugmani bosing va "Asosiy ekranga qo'shish" ni tanlang.<br><br>
+                • <strong>iPhone (iOS):</strong> Pastki "Ulashish" (Share <i data-lucide="share" class="inline w-3 h-3"></i>) tugmasini bosing va "Asosiy ekranga" (Add to Home Screen) ni bosing.
+            </div>
+            <div class="flex items-center gap-2 pt-2">
+                <button id="triggerNativeInstallBtn" class="flex-1 py-2.5 rounded-2xl bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-xs shadow-lg transition-all hidden">
+                    O'rnatish
+                </button>
+                <button id="closeInstallModalBtn" class="flex-1 py-2.5 rounded-2xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs transition-all">
+                    Yopish
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT LOGIC & METEO PWA ENGINE -->
+    <script>
+        // App State
+        const state = {
+            city: "Toshkent",
+            lat: 41.2995,
+            lon: 69.2401,
+            unit: "C",
+            lang: "UZ",
+            isDay: false,
+            weatherData: null,
+            searchTimer: null,
+            deferredInstallPrompt: null
+        };
+
+        // Translations Dictionary
+        const i18n = {
+            UZ: {
+                max: "Yuqori", min: "Pastroq", feels: "Hissiyot",
+                hourly: "Soatlik Prognoz (24 Soat)", daily: "7 Kunlik Ob-Havo",
+                uv: "UV Indeks", wind: "Shamol", humidity: "Namlik", aqi: "Havo Sifati",
+                sun: "Quyosh Botishi", pressure: "Bosim / Ko'rinish",
+                windDesc: "Barqaror shamol", sunDesc: "Kun davomiyligi: ~12 soat", visDesc: "Tiniq ko'rinish",
+                bannerText: "Joylashuvingizga ruxsat bering, aniq ob-havoni ko'rsatamiz.",
+                allowBtn: "Ruxsat berish", gpsText: "Joylashuv", installText: "App"
+            },
+            EN: {
+                max: "High", min: "Low", feels: "Feels like",
+                hourly: "Hourly Forecast (24h)", daily: "7-Day Forecast",
+                uv: "UV Index", wind: "Wind", humidity: "Humidity", aqi: "Air Quality",
+                sun: "Sunset", pressure: "Pressure / Visibility",
+                windDesc: "Moderate wind", sunDesc: "Daylight: ~12 hours", visDesc: "Clear visibility",
+                bannerText: "Enable location permission to show exact local weather.",
+                allowBtn: "Allow Location", gpsText: "Location", installText: "App"
+            }
+        };
+
+        // Popular cities dataset
+        const popularCities = [
+            { name: "Toshkent", country: "O'zbekiston", lat: 41.2995, lon: 69.2401 },
+            { name: "Samarqand", country: "O'zbekiston", lat: 39.6542, lon: 66.9597 },
+            { name: "Buxoro", country: "O'zbekiston", lat: 39.7747, lon: 64.4286 },
+            { name: "Namangan", country: "O'zbekiston", lat: 41.0011, lon: 71.6683 },
+            { name: "Andijon", country: "O'zbekiston", lat: 40.7821, lon: 72.3442 },
+            { name: "Farg'ona", country: "O'zbekiston", lat: 40.3842, lon: 71.7843 },
+            { name: "Xiva", country: "O'zbekiston", lat: 41.3783, lon: 60.3639 },
+            { name: "Nukus", country: "O'zbekiston", lat: 42.4619, lon: 59.6166 },
+            { name: "London", country: "UK", lat: 51.5074, lon: -0.1278 },
+            { name: "Nyu-York", country: "USA", lat: 40.7128, lon: -74.0060 },
+            { name: "Tokio", country: "Japan", lat: 35.6762, lon: 139.6503 }
+        ];
+
+        // Dynamic PWA Manifest Injector
+        function setupDynamicManifest() {
+            const manifest = {
+                name: "iOS 26 Liquid Glass Weather",
+                short_name: "Ob-Havo Glass",
+                start_url: "./",
+                display: "standalone",
+                background_color: "#090d16",
+                theme_color: "#090d16",
+                icons: [
+                    { src: "https://placehold.co/192x192/007aff/ffffff?text=Weather", sizes: "192x192", type: "image/png" },
+                    { src: "https://placehold.co/512x512/007aff/ffffff?text=Weather", sizes: "512x512", type: "image/png" }
+                ]
+            };
+            const stringManifest = JSON.stringify(manifest);
+            const blob = new Blob([stringManifest], {type: 'application/json'});
+            const manifestURL = URL.createObjectURL(blob);
+            const link = document.createElement('link');
+            link.rel = 'manifest';
+            link.href = manifestURL;
+            document.head.appendChild(link);
+        }
+
+        // Initialize App
+        window.addEventListener('DOMContentLoaded', () => {
+            setupDynamicManifest();
+            updateLiveClock();
+            setInterval(updateLiveClock, 1000);
+
+            setupEventListeners();
+            setupPWA();
+            initStarsCanvas();
+
+            // Auto Request GPS Geolocation on Startup
+            requestGPSLocation(true);
+        });
+
+        // Clock Update & Auto Day/Night Check
+        function updateLiveClock() {
+            const now = new Date();
+            const hours = now.getHours();
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            document.getElementById('liveTime').textContent = `${String(hours).padStart(2, '0')}:${minutes}`;
+
+            // Determine day (06:00 to 18:00) unless API provided exact is_day
+            if (state.weatherData && state.weatherData.current.is_day !== undefined) {
+                state.isDay = state.weatherData.current.is_day === 1;
+            } else {
+                state.isDay = hours >= 6 && hours < 18;
+            }
+            updateTimeOfDayTheme();
+        }
+
+        // Dynamic Time-of-Day Adaptive UI Theme Switcher
+        function updateTimeOfDayTheme() {
+            const bgMesh = document.getElementById('bgMesh');
+            const starsCanvas = document.getElementById('starsCanvas');
+            const dayNightDot = document.getElementById('dayNightDot');
+            const themeMeta = document.getElementById('themeColorMeta');
+
+            const orb1 = document.getElementById('orb1');
+            const orb2 = document.getElementById('orb2');
+
+            if (state.isDay) {
+                // Day Mode: Bright Musafo Osmon Azure Sky
+                bgMesh.className = "fixed inset-0 bg-mesh-day transition-all duration-1000 -z-30";
+                starsCanvas.style.opacity = "0";
+                dayNightDot.className = "w-2.5 h-2.5 rounded-full bg-amber-300 animate-ping";
+                themeMeta.content = "#0369a1";
+                document.body.style.background = "#0369a1";
+
+                orb1.className = "fixed top-1/4 left-10 w-72 h-72 sm:w-96 sm:h-96 bg-sky-300/40 rounded-full filter blur-[100px] animate-float -z-10 pointer-events-none transition-colors duration-1000";
+                orb2.className = "fixed bottom-1/4 right-10 w-80 h-80 sm:w-[500px] sm:h-[500px] bg-amber-300/30 rounded-full filter blur-[120px] animate-pulse-glow -z-10 pointer-events-none transition-colors duration-1000";
+            } else {
+                // Night Mode: Dark Indigo/Purple Night Sky + Stars
+                bgMesh.className = "fixed inset-0 bg-mesh-night transition-all duration-1000 -z-30";
+                starsCanvas.style.opacity = "1";
+                dayNightDot.className = "w-2.5 h-2.5 rounded-full bg-indigo-400 animate-ping";
+                themeMeta.content = "#090d16";
+                document.body.style.background = "#090d16";
+
+                orb1.className = "fixed top-1/4 left-10 w-72 h-72 sm:w-96 sm:h-96 bg-purple-600/30 rounded-full filter blur-[100px] animate-float -z-10 pointer-events-none transition-colors duration-1000";
+                orb2.className = "fixed bottom-1/4 right-10 w-80 h-80 sm:w-[500px] sm:h-[500px] bg-cyan-500/25 rounded-full filter blur-[120px] animate-pulse-glow -z-10 pointer-events-none transition-colors duration-1000";
+            }
+        }
+
+        // Night Mode Canvas: Stars & Shooting Stars Animation
+        let stars = [];
+        let shootingStars = [];
+        function initStarsCanvas() {
+            const canvas = document.getElementById('starsCanvas');
+            const ctx = canvas.getContext('2d');
+
+            function resize() {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+                createStars();
+            }
+
+            function createStars() {
+                stars = [];
+                const count = Math.floor((canvas.width * canvas.height) / 3000);
+                for (let i = 0; i < count; i++) {
+                    stars.push({
+                        x: Math.random() * canvas.width,
+                        y: Math.random() * canvas.height,
+                        radius: Math.random() * 1.5,
+                        alpha: Math.random(),
+                        speed: 0.005 + Math.random() * 0.015
+                    });
+                }
+            }
+
+            function spawnShootingStar() {
+                if (!state.isDay && Math.random() < 0.03 && shootingStars.length < 3) {
+                    shootingStars.push({
+                        x: Math.random() * canvas.width,
+                        y: Math.random() * (canvas.height * 0.5),
+                        length: 80 + Math.random() * 60,
+                        speed: 8 + Math.random() * 6,
+                        angle: Math.PI / 4 + (Math.random() * 0.2 - 0.1),
+                        alpha: 1
+                    });
+                }
+            }
+
+            function animate() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                if (!state.isDay) {
+                    // Draw Twinkling Stars
+                    stars.forEach(star => {
+                        star.alpha += star.speed;
+                        if (star.alpha > 1 || star.alpha < 0) star.speed = -star.speed;
+
+                        ctx.beginPath();
+                        ctx.arc(star.x, star.y, star.radius, 0, Math.PI * 2);
+                        ctx.fillStyle = `rgba(255, 255, 255, ${Math.abs(star.alpha)})`;
+                        ctx.fill();
+                    });
+
+                    // Draw & Update Shooting Stars
+                    spawnShootingStar();
+                    for (let i = shootingStars.length - 1; i >= 0; i--) {
+                        const ss = shootingStars[i];
+                        const endX = ss.x - Math.cos(ss.angle) * ss.length;
+                        const endY = ss.y - Math.sin(ss.angle) * ss.length;
+
+                        const grad = ctx.createLinearGradient(ss.x, ss.y, endX, endY);
+                        grad.addColorStop(0, `rgba(255, 255, 255, ${ss.alpha})`);
+                        grad.addColorStop(1, `rgba(255, 255, 255, 0)`);
+
+                        ctx.beginPath();
+                        ctx.moveTo(ss.x, ss.y);
+                        ctx.lineTo(endX, endY);
+                        ctx.strokeStyle = grad;
+                        ctx.lineWidth = 2;
+                        ctx.stroke();
+
+                        ss.x += Math.cos(ss.angle) * ss.speed;
+                        ss.y += Math.sin(ss.angle) * ss.speed;
+                        ss.alpha -= 0.015;
+
+                        if (ss.alpha <= 0 || ss.x > canvas.width || ss.y > canvas.height) {
+                            shootingStars.splice(i, 1);
+                        }
+                    }
+                }
+
+                requestAnimationFrame(animate);
+            }
+
+            window.addEventListener('resize', resize);
+            resize();
+            animate();
+        }
+
+        // GPS Geolocation Handler & Reverse Geocoding
+        function requestGPSLocation(isStartup = false) {
+            if ("geolocation" in navigator) {
+                navigator.geolocation.getCurrentPosition(
+                    async (position) => {
+                        const lat = position.coords.latitude;
+                        const lon = position.coords.longitude;
+
+                        document.getElementById('permissionBanner').classList.add('hidden');
+
+                        const cityName = await reverseGeocode(lat, lon);
+                        fetchWeatherData(lat, lon, cityName);
+                    },
+                    (error) => {
+                        console.log("GPS Permission Error:", error.message);
+                        if (isStartup) {
+                            document.getElementById('permissionBanner').classList.remove('hidden');
+                            fetchWeatherData(state.lat, state.lon, state.city);
+                        } else {
+                            alert("Joylashuvni aniqlashga ruxsat berilmadi.");
+                        }
+                    },
+                    { timeout: 10000, enableHighAccuracy: true }
+                );
+            } else {
+                fetchWeatherData(state.lat, state.lon, state.city);
+            }
+        }
+
+        // Reverse Geocoding via Nominatim API
+        async function reverseGeocode(lat, lon) {
+            try {
+                const res = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json&accept-language=uz`);
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data.address) {
+                        return data.address.city || data.address.town || data.address.county || data.address.state || "Mening joylashuvim";
+                    }
+                }
+            } catch (err) {
+                console.log("Reverse geocode failed:", err);
+            }
+            return "Mening joylashuvim";
+        }
+
+        // Fetch Weather Data from Open-Meteo
+        async function fetchWeatherData(lat, lon, cityName) {
+            try {
+                const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,weather_code,surface_pressure,wind_speed_10m,wind_direction_10m&hourly=temperature_2m,precipitation_probability,weather_code&daily=weather_code,temperature_2m_max,temperature_2m_min,sunrise,sunset,uv_index_max&timezone=auto`;
+
+                const res = await fetch(url);
+                if (!res.ok) throw new Error("API error");
+                const data = await res.json();
+
+                state.weatherData = data;
+                state.city = cityName;
+                state.lat = lat;
+                state.lon = lon;
+
+                if (data.current && data.current.is_day !== undefined) {
+                    state.isDay = data.current.is_day === 1;
+                }
+
+                updateTimeOfDayTheme();
+                renderUI();
+            } catch (err) {
+                console.error("Fetch error:", err);
+                renderMockFallback(cityName);
+            }
+        }
+
+        // Render UI Elements
+        function renderUI() {
+            if (!state.weatherData) return;
+            const current = state.weatherData.current;
+            const daily = state.weatherData.daily;
+            const hourly = state.weatherData.hourly;
+
+            document.getElementById('currentCityHeader').textContent = state.city;
+            document.getElementById('cityName').textContent = state.city;
+
+            const weatherInfo = getWeatherDetails(current.weather_code);
+            toggleRainEffect(weatherInfo.rain);
+
+            // Hero Temps
+            document.getElementById('heroTemp').textContent = `${convertTemp(current.temperature_2m)}°`;
+            document.getElementById('heroCondition').textContent = weatherInfo.desc;
+            document.getElementById('heroFeelsLike').textContent = `${convertTemp(current.apparent_temperature)}°`;
+            document.getElementById('heroMaxTemp').textContent = `${convertTemp(daily.temperature_2m_max[0])}°`;
+            document.getElementById('heroMinTemp').textContent = `${convertTemp(daily.temperature_2m_min[0])}°`;
+
+            document.getElementById('weatherIconContainer').innerHTML = `<i data-lucide="${weatherInfo.icon}" class="w-28 h-28 sm:w-36 sm:h-36 ${weatherInfo.icon === 'sun' ? 'animate-spin-slow' : 'animate-bounce'}"></i>`;
+
+            renderHourlyForecast(hourly);
+            renderDailyForecast(daily);
+            renderWidgets(current, daily);
+
+            lucide.createIcons();
+        }
+
+        // Render Hourly Ribbon
+        function renderHourlyForecast(hourly) {
+            const container = document.getElementById('hourlyContainer');
+            container.innerHTML = '';
+            const currentHour = new Date().getHours();
+
+            for (let i = 0; i < 24; i++) {
+                const hourTime = (currentHour + i) % 24;
+                const timeLabel = i === 0 ? "Hozir" : `${String(hourTime).padStart(2, '0')}:00`;
+                const temp = convertTemp(hourly.temperature_2m[i]);
+                const info = getWeatherDetails(hourly.weather_code[i]);
+                const rainProb = hourly.precipitation_probability ? hourly.precipitation_probability[i] : 0;
+
+                const card = document.createElement('div');
+                card.className = `flex-shrink-0 w-20 py-3.5 px-2.5 rounded-2xl flex flex-col items-center justify-between gap-2 border transition-all ${i === 0 ? 'bg-white/25 border-white/40 shadow-lg scale-105' : 'bg-white/5 border-white/10 hover:bg-white/15'}`;
+
+                card.innerHTML = `
+                    <span class="text-xs font-medium text-white/80">${timeLabel}</span>
+                    <i data-lucide="${info.icon}" class="w-6 h-6 my-1 ${info.icon === 'sun' ? 'text-amber-300' : 'text-sky-200'}"></i>
+                    ${rainProb > 20 ? `<span class="text-[10px] text-cyan-300 font-bold">${rainProb}%</span>` : ''}
+                    <span class="text-sm font-bold">${temp}°</span>
+                `;
+                container.appendChild(card);
+            }
+        }
+
+        // Render 7 Day List
+        function renderDailyForecast(daily) {
+            const container = document.getElementById('dailyContainer');
+            container.innerHTML = '';
+            const dayNames = state.lang === "UZ" ? ["Yak", "Dush", "Sesh", "Chorsh", "Pansh", "Juma", "Shan"] : ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+            const todayIndex = new Date().getDay();
+
+            for (let i = 0; i < 7; i++) {
+                const dayLabel = i === 0 ? (state.lang === "UZ" ? "Bugun" : "Today") : dayNames[(todayIndex + i) % 7];
+                const min = convertTemp(daily.temperature_2m_min[i]);
+                const max = convertTemp(daily.temperature_2m_max[i]);
+                const info = getWeatherDetails(daily.weather_code[i]);
+
+                const row = document.createElement('div');
+                row.className = "flex items-center justify-between gap-3 text-sm font-medium py-1.5 px-2 rounded-xl hover:bg-white/10 transition-colors";
+
+                row.innerHTML = `
+                    <span class="w-16 font-semibold text-white/90">${dayLabel}</span>
+                    <div class="flex items-center gap-2 w-28 text-xs text-white/70">
+                        <i data-lucide="${info.icon}" class="w-5 h-5 ${info.icon === 'sun' ? 'text-amber-300' : 'text-sky-200'}"></i>
+                        <span class="truncate text-[11px] hidden sm:inline">${info.desc}</span>
+                    </div>
+                    <div class="flex items-center gap-3 flex-1 justify-end">
+                        <span class="text-white/60 text-xs w-6 text-right">${min}°</span>
+                        <div class="w-20 sm:w-28 temp-bar-bg">
+                            <div class="temp-bar-fill" style="width: ${Math.min(100, Math.max(20, (max - min) * 4))}%;"></div>
+                        </div>
+                        <span class="font-bold text-xs w-6">${max}°</span>
+                    </div>
+                `;
+                container.appendChild(row);
+            }
+        }
+
+        // Render Widgets
+        function renderWidgets(current, daily) {
+            const uv = Math.round(daily.uv_index_max ? daily.uv_index_max[0] : 4);
+            document.getElementById('uvValue').textContent = uv;
+            document.getElementById('uvBar').style.width = `${(uv / 12) * 100}%`;
+            document.getElementById('uvDesc').textContent = uv <= 2 ? "Past" : (uv <= 5 ? "O'rtacha" : "Yuqori");
+
+            const windSpd = Math.round(current.wind_speed_10m);
+            const windDeg = current.wind_direction_10m || 0;
+            document.getElementById('windSpeed').innerHTML = `${windSpd} <span class="text-xs font-normal">km/s</span>`;
+            document.getElementById('windCompass').style.transform = `rotate(${windDeg}deg)`;
+            document.getElementById('windDirText').textContent = getWindDirectionText(windDeg);
+
+            const hum = current.relative_humidity_2m;
+            document.getElementById('humidityVal').textContent = `${hum}%`;
+            document.getElementById('humidityBar').style.width = `${hum}%`;
+
+            const aqi = Math.round(25 + (hum % 30));
+            document.getElementById('aqiVal').textContent = aqi;
+            document.getElementById('aqiBar').style.width = `${(aqi / 200) * 100}%`;
+            document.getElementById('aqiStatus').textContent = aqi <= 50 ? "A'lo va toza" : "O'rtacha";
+
+            if (daily.sunrise && daily.sunset) {
+                document.getElementById('sunriseTime').textContent = `Chiqishi: ${daily.sunrise[0].split('T')[1].substring(0, 5)}`;
+                document.getElementById('sunsetTime').textContent = daily.sunset[0].split('T')[1].substring(0, 5);
+            }
+
+            const pressure = current.surface_pressure ? Math.round(current.surface_pressure) : 1014;
+            document.getElementById('pressureVal').textContent = `Bosim: ${pressure} hPa`;
+        }
+
+        // Weather Code WMO Translator
+        function getWeatherDetails(code) {
+            switch(code) {
+                case 0: return { desc: state.isDay ? "Musaffo ochiq osmon" : "Musaffo yulduzli tun", icon: state.isDay ? "sun" : "moon", rain: false };
+                case 1: case 2: return { desc: "Kichik bulutli", icon: state.isDay ? "cloud-sun" : "cloud-moon", rain: false };
+                case 3: return { desc: "Bulutli", icon: "cloud", rain: false };
+                case 45: case 48: return { desc: "Tumanli", icon: "cloud-fog", rain: false };
+                case 51: case 53: case 55: return { desc: "Shivalagan yomg'ir", icon: "cloud-drizzle", rain: true };
+                case 61: case 63: case 65: return { desc: "Yomg'irli", icon: "cloud-rain", rain: true };
+                case 71: case 73: case 75: return { desc: "Qor yog'moqda", icon: "snowflake", rain: false };
+                case 80: case 81: case 82: return { desc: "Jala va kuchli yomg'ir", icon: "cloud-lightning", rain: true };
+                case 95: case 96: case 99: return { desc: "Momaqaldiroq va chaqmoq", icon: "zap", rain: true };
+                default: return { desc: "Ochiq havo", icon: state.isDay ? "sun" : "moon", rain: false };
+            }
+        }
+
+        // Helpers
+        function convertTemp(c) {
+            return state.unit === "F" ? Math.round((c * 9/5) + 32) : Math.round(c);
+        }
+
+        function getWindDirectionText(deg) {
+            const dirs = ["Shimoliy", "Shimoli-Sharqiy", "Sharqiy", "Janubi-Sharqiy", "Janubiy", "Janubi-G'arbiy", "G'arbiy", "Shimoli-G'arbiy"];
+            return dirs[Math.floor(((deg + 22.5) % 360) / 45)];
+        }
+
+        function toggleRainEffect(isRainy) {
+            const container = document.getElementById('rainContainer');
+            container.innerHTML = '';
+            if (isRainy) {
+                container.classList.remove('hidden');
+                for (let i = 0; i < 30; i++) {
+                    const drop = document.createElement('div');
+                    drop.className = 'rain-drop';
+                    drop.style.left = `${Math.random() * 100}%`;
+                    drop.style.animationDuration = `${0.8 + Math.random() * 0.8}s`;
+                    drop.style.animationDelay = `${Math.random() * 2}s`;
+                    container.appendChild(drop);
+                }
+            } else {
+                container.classList.add('hidden');
+            }
+        }
+
+        // PWA Installation Prompts Handling
+        function setupPWA() {
+            window.addEventListener('beforeinstallprompt', (e) => {
+                e.preventDefault();
+                state.deferredInstallPrompt = e;
+                document.getElementById('triggerNativeInstallBtn').classList.remove('hidden');
+            });
+
+            document.getElementById('installAppBtn').addEventListener('click', () => {
+                document.getElementById('installModal').classList.remove('hidden');
+            });
+
+            document.getElementById('closeInstallModalBtn').addEventListener('click', () => {
+                document.getElementById('installModal').classList.add('hidden');
+            });
+
+            document.getElementById('triggerNativeInstallBtn').addEventListener('click', async () => {
+                if (state.deferredInstallPrompt) {
+                    state.deferredInstallPrompt.prompt();
+                    const { outcome } = await state.deferredInstallPrompt.userChoice;
+                    console.log(`PWA Install outcome: ${outcome}`);
+                    state.deferredInstallPrompt = null;
+                    document.getElementById('installModal').classList.add('hidden');
+                }
+            });
+        }
+
+        // Setup All UI Event Handlers
+        function setupEventListeners() {
+            document.getElementById('gpsBtn').addEventListener('click', () => requestGPSLocation(false));
+            document.getElementById('allowLocationBtn').addEventListener('click', () => requestGPSLocation(false));
+            document.getElementById('closeBannerBtn').addEventListener('click', () => {
+                document.getElementById('permissionBanner').classList.add('hidden');
+            });
+
+            const btnC = document.getElementById('btnCelsius');
+            const btnF = document.getElementById('btnFahrenheit');
+            btnC.addEventListener('click', () => {
+                state.unit = "C";
+                btnC.className = "px-2 sm:px-2.5 py-1 rounded-xl text-xs font-bold transition-all bg-white/30 text-white shadow-sm";
+                btnF.className = "px-2 sm:px-2.5 py-1 rounded-xl text-xs font-bold transition-all text-white/60 hover:text-white";
+                renderUI();
+            });
+            btnF.addEventListener('click', () => {
+                state.unit = "F";
+                btnF.className = "px-2 sm:px-2.5 py-1 rounded-xl text-xs font-bold transition-all bg-white/30 text-white shadow-sm";
+                btnC.className = "px-2 sm:px-2.5 py-1 rounded-xl text-xs font-bold transition-all text-white/60 hover:text-white";
+                renderUI();
+            });
+
+            const langBtn = document.getElementById('langToggleBtn');
+            langBtn.addEventListener('click', () => {
+                state.lang = state.lang === "UZ" ? "EN" : "UZ";
+                langBtn.textContent = state.lang;
+                updateLanguageUI();
+                renderUI();
+            });
+
+            const searchInput = document.getElementById('searchInput');
+            const searchResults = document.getElementById('searchResults');
+            const clearBtn = document.getElementById('clearSearchBtn');
+
+            searchInput.addEventListener('input', (e) => {
+                const query = e.target.value.trim().toLowerCase();
+                if (query.length > 0) {
+                    clearBtn.classList.remove('hidden');
+                } else {
+                    clearBtn.classList.add('hidden');
+                    searchResults.classList.add('hidden');
+                    return;
+                }
+                clearTimeout(state.searchTimer);
+                state.searchTimer = setTimeout(() => handleSearchSuggestions(query), 200);
+            });
+
+            clearBtn.addEventListener('click', () => {
+                searchInput.value = '';
+                clearBtn.classList.add('hidden');
+                searchResults.classList.add('hidden');
+            });
+
+            document.addEventListener('click', (e) => {
+                if (!searchInput.contains(e.target) && !searchResults.contains(e.target)) {
+                    searchResults.classList.add('hidden');
+                }
+            });
+        }
+
+        // Live Search Suggestions Engine
+        async function handleSearchSuggestions(query) {
+            const searchResults = document.getElementById('searchResults');
+            searchResults.innerHTML = '';
+
+            const localMatches = popularCities.filter(c =>
+                c.name.toLowerCase().includes(query) || c.country.toLowerCase().includes(query)
+            );
+
+            let apiMatches = [];
+            try {
+                const geoRes = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(query)}&count=5&language=uz&format=json`);
+                if (geoRes.ok) {
+                    const geoData = await geoRes.json();
+                    if (geoData.results) {
+                        apiMatches = geoData.results.map(r => ({
+                            name: r.name,
+                            country: r.country || "",
+                            lat: r.latitude,
+                            lon: r.longitude
+                        }));
+                    }
+                }
+            } catch (err) {
+                console.log("Geocode error:", err);
+            }
+
+            const combined = [...localMatches, ...apiMatches];
+            const uniqueList = Array.from(new Set(combined.map(a => a.name)))
+                .map(name => combined.find(a => a.name === name))
+                .slice(0, 6);
+
+            if (uniqueList.length === 0) {
+                searchResults.innerHTML = `<div class="p-4 text-xs text-center text-white/50">Topilmadi</div>`;
+                searchResults.classList.remove('hidden');
+                return;
+            }
+
+            uniqueList.forEach(city => {
+                const item = document.createElement('div');
+                item.className = "px-4 py-3 hover:bg-white/20 cursor-pointer transition-colors flex items-center justify-between text-sm";
+                item.innerHTML = `
+                    <div class="flex items-center gap-2">
+                        <i data-lucide="map-pin" class="w-4 h-4 text-amber-300"></i>
+                        <span class="font-medium text-white">${city.name}</span>
+                    </div>
+                    <span class="text-xs text-white/50">${city.country}</span>
+                `;
+
+                item.addEventListener('click', () => {
+                    document.getElementById('searchInput').value = '';
+                    document.getElementById('clearSearchBtn').classList.add('hidden');
+                    searchResults.classList.add('hidden');
+                    fetchWeatherData(city.lat, city.lon, city.name);
+                });
+
+                searchResults.appendChild(item);
+            });
+
+            lucide.createIcons();
+            searchResults.classList.remove('hidden');
+        }
+
+        // Language Strings Switcher
+        function updateLanguageUI() {
+            const lang = i18n[state.lang];
+            document.getElementById('lblMax').textContent = lang.max;
+            document.getElementById('lblMin').textContent = lang.min;
+            document.getElementById('lblFeels').textContent = lang.feels;
+            document.getElementById('lblHourly').textContent = lang.hourly;
+            document.getElementById('lblDaily').textContent = lang.daily;
+            document.getElementById('lblUV').textContent = lang.uv;
+            document.getElementById('lblWind').textContent = lang.wind;
+            document.getElementById('lblHumidity').textContent = lang.humidity;
+            document.getElementById('lblAQI').textContent = lang.aqi;
+            document.getElementById('lblSun').textContent = lang.sun;
+            document.getElementById('lblPressure').textContent = lang.pressure;
+            document.getElementById('lblWindDesc').textContent = lang.windDesc;
+            document.getElementById('lblSunDesc').textContent = lang.sunDesc;
+            document.getElementById('lblVisDesc').textContent = lang.visDesc;
+            document.getElementById('bannerText').textContent = lang.bannerText;
+            document.getElementById('allowLocationBtn').textContent = lang.allowBtn;
+            document.getElementById('gpsBtnText').textContent = lang.gpsText;
+            document.getElementById('installBtnText').textContent = lang.installText;
+        }
+
+        // Mock Fallback
+        function renderMockFallback(cityName) {
+            state.city = cityName;
+            document.getElementById('currentCityHeader').textContent = cityName;
+            document.getElementById('cityName').textContent = cityName;
+            document.getElementById('heroTemp').textContent = "22°";
+            document.getElementById('heroCondition').textContent = "Musaffo osmon";
+        }
+    </script>
+</body>
+</html>
